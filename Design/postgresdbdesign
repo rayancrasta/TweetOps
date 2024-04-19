@@ -1,0 +1,20 @@
+CREATE TABLE Users (
+    UserID INTEGER PRIMARY KEY,
+    Username VARCHAR(30) UNIQUE,
+    Password VARCHAR(30),
+    FollowersCount INTEGER,
+    FollowingCount INTEGER
+)
+
+CREATE TABLE Followers (
+    UserID INTEGER REFERENCES Users(UserID),
+    FollowerID INTEGER REFERENCES Users(UserID)
+)
+FollowerID is the userID of users who follow UserID
+
+CREATE TABLE Following (
+    UserID INTEGER REFERENCES Users(UserID),
+    FollowingID INTEGER REFERENCES Users(UserID)
+)
+FollowingID is the userID of users who UserID is following
+
