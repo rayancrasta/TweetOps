@@ -1,0 +1,20 @@
+#Kafka start
+/opt/homebrew/bin/zookeeper-server-start /opt/homebrew/etc/zookeeper/zoo.cfg
+/opt/homebrew/bin/kafka-server-start /opt/homebrew/etc/kafka/server.properties
+
+#Kafka topic:
+kafka-topics --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic tweetsEN
+
+# check contents of kafka topic
+kafka-console-consumer --bootstrap-server localhost:9092 --topic tweetsEN --from-beginning
+
+# kafka topic delete
+kafka-topics --bootstrap-server localhost:9092 --delete --topic tweetsRW
+
+#List consumer groups
+kafka-consumer-groups --bootstrap-server localhost:9092 --list
+
+kafka-consumer-groups --bootstrap-server localhost:9092 --describe --group console-consumer-13913
+
+
+

@@ -1,0 +1,2 @@
+producer.Flush() explicitly triggers the sending of all buffered messages to the Kafka brokers. It waits for the acknowledgement from the Kafka broker that the messages have been successfully received. Once Flush() returns, you can be sure that all messages have been sent
+

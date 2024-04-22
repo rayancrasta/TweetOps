@@ -49,7 +49,6 @@ func (app *Config) Follow(w http.ResponseWriter, r *http.Request) {
 	var response jsonResponse
 	response.Message = fmt.Sprintf("Success: %v Follows %v", followreq.UserID, followreq.TargetID)
 	writeJSON(w, http.StatusOK, response)
-
 }
 
 func (app *Config) UnFollow(w http.ResponseWriter, r *http.Request) {
@@ -88,3 +87,4 @@ func (app *Config) UnFollow(w http.ResponseWriter, r *http.Request) {
 	response.Message = fmt.Sprintf("Success: %v UnFollowed %v", followreq.UserID, followreq.TargetID)
 	writeJSON(w, http.StatusOK, response)
 }
+
