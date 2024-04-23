@@ -1,6 +1,7 @@
 #Kafka start
-/opt/homebrew/bin/zookeeper-server-start /opt/homebrew/etc/zookeeper/zoo.cfg
-/opt/homebrew/bin/kafka-server-start /opt/homebrew/etc/kafka/server.properties
+cmd aliases
+zooks : /opt/homebrew/bin/zookeeper-server-start /opt/homebrew/etc/zookeeper/zoo.cfg
+kooks : /opt/homebrew/bin/kafka-server-start /opt/homebrew/etc/kafka/server.properties
 
 #Kafka topic:
 kafka-topics --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic tweetsEN

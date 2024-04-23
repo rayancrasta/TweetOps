@@ -1,15 +1,20 @@
 package main
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/elastic/go-elasticsearch"
+	"github.com/elastic/go-elasticsearch/esapi"
 )
 
 type Tweet struct {
@@ -30,17 +35,27 @@ type Tweet struct {
 }
 
 func consumeMessages() {
-	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
+
+	var KafkaConsumerConfig = &kafka.ConfigMap{
 		"bootstrap.servers":  os.Getenv("kafkaBroker"),
-		"group.id":           "tweetES-consumer-group",
+		"group.id":           os.Getenv("consumergroupid"),
 		"auto.offset.reset":  "earliest",
 		"enable.auto.commit": "true",
-	})
+	}
 
-	//commit it later on putting tweet in elasticsearch
-
+	consumer, err := kafka.NewConsumer(KafkaConsumerConfig)
 	if err != nil {
 		log.Fatalf("Error creating Kafka consumer: %v", err)
+	}
+
+	// Set up Elasticsearch client
+	var ESConfig = elasticsearch.Config{
+		Addresses: []string{os.Getenv("elasticsearchaddr")}, // Change this to your Elasticsearch address
+	}
+
+	esClient, err := elasticsearch.NewClient(ESConfig)
+	if err != nil {
+		log.Fatalf("Error creating Elasticsearch client: %s", err)
 	}
 
 	//Subscribe to Kafka topic
@@ -74,6 +89,19 @@ func consumeMessages() {
 				log.Println(tweet)
 
 				//Put into elasticsearch from here
+				req := esapi.IndexRequest{
+					Index:      "tweetscombined",
+					DocumentID: strconv.Itoa(tweet.Status_id),
+					Body:       bytes.NewReader(msg.Value),
+					Refresh:    "true",
+				}
+
+				res, err := req.Do(context.Background(), esClient)
+				if err != nil {
+					log.Printf("Error indexing tweet into Elasticsearch: %v", err)
+					continue
+				}
+				defer res.Body.Close()
 
 			} else {
 				fmt.Printf("Consumer error: %v\n", err)

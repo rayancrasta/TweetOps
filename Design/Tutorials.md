@@ -1,4 +1,6 @@
 https://medium.com/@teeppiphat/install-elasticsearch-docker-on-macos-m1-7dfbb8876b99
+https://discuss.elastic.co/t/kibana-asking-for-enrollment-token-when-xpack-security-enabled-false-in-elasticsearch/302118/2
+
 
 https://jndrbr7.hashnode.dev/elastic-search-multi-node-cluster-with-docker-compose
 
