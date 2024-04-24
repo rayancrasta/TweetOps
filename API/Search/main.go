@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"tweetsproducer/initializers"
+	"searchquery/initializers"
 )
 
-const webPort = "8083"
+const webPort = "8084"
 
 type Config struct {
 }
@@ -19,7 +19,7 @@ func init() {
 func main() {
 	app := Config{}
 
-	log.Printf("Starting Producer service on port: %s", webPort)
+	log.Printf("Starting Search service on port: %s", webPort)
 
 	// HTTP server
 	srv := &http.Server{
