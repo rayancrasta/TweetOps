@@ -6,6 +6,7 @@ type User struct {
 	Password       string
 	FollowersCount int
 	FollowingCount int
+	Verified       bool
 }
 
 type Follower struct {

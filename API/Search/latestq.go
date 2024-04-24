@@ -21,7 +21,7 @@ func (app *Config) searchLatest(w http.ResponseWriter, r *http.Request) {
 	//Decode the payload
 	err := json.NewDecoder(r.Body).Decode(&userQuery)
 	if err != nil {
-		errorJSON(w, fmt.Errorf("error: Failed to query tweet form: %v", err), http.StatusInternalServerError)
+		errorJSON(w, fmt.Errorf("error: Failed to query search form: %v", err), http.StatusInternalServerError)
 		return
 	}
 

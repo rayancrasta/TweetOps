@@ -15,8 +15,12 @@ import (
 )
 
 type Profile struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	UserID         int    `json:"user_id"`
+	Username       string `json:"username"`
+	Password       string `json:"password"`
+	Followerscount int    `json:"followers_count"`
+	Followingcount int    `json:"following_count"`
+	Verified       bool   `json:"verified"`
 }
 
 func (app *Config) SignUp(w http.ResponseWriter, r *http.Request) {
@@ -38,7 +42,7 @@ func (app *Config) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create a user
-	user := models.User{Username: profile.Username, Password: string(hash)}
+	user := models.User{UserID: profile.UserID, Username: profile.Username, Password: string(hash), FollowersCount: profile.Followerscount, FollowingCount: profile.Followingcount}
 	result := initializers.DB.Clauses(clause.OnConflict{DoNothing: true}).Create(&user) // if not exsists insert
 
 	if result.Error != nil {

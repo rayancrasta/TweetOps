@@ -15,7 +15,7 @@ type Config struct {
 func init() {
 	initializers.LoadEnvVariables()
 	initializers.ConnectToDb()
-	// initializers.SyncDatabase()
+	initializers.SyncDatabase()
 }
 
 func main() {

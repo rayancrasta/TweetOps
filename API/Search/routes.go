@@ -26,6 +26,7 @@ func (app *Config) routes() http.Handler {
 
 	//Add route at root level
 	mux.Get("/searchLatest", app.searchLatest)
+	mux.Get("/searchPeople", app.searchPeople)
 
 	return mux
 }
