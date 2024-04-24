@@ -5,19 +5,25 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
 
 	"github.com/elastic/go-elasticsearch/v8"
 )
 
 type Query struct {
-	Query    string `json:"query"`
-	Safemode bool   `json:"safemode",optional`
+	Query       string `json:"query"`
+	Safemode    bool   `json:"safemode",optional`
+	Page        int    `json:"page",optional`
+	Accountlang string `json:"account_lang"`
 }
 
 func (app *Config) searchLatest(w http.ResponseWriter, r *http.Request) {
 
 	var userQuery Query
+	userQuery.Page = 0 // default for pagination
+
 	//Decode the payload
 	err := json.NewDecoder(r.Body).Decode(&userQuery)
 	if err != nil {
@@ -39,8 +45,19 @@ func (app *Config) searchLatest(w http.ResponseWriter, r *http.Request) {
 	var buf bytes.Buffer
 	query := map[string]interface{}{
 		"query": map[string]interface{}{
-			"match": map[string]interface{}{
-				"text": userQuery.Query,
+			"bool": map[string]interface{}{
+				"must": []map[string]interface{}{
+					{
+						"match": map[string]interface{}{
+							"text": userQuery.Query,
+						},
+					},
+					{
+						"term": map[string]interface{}{
+							"lang": userQuery.Accountlang,
+						},
+					},
+				},
 			},
 		},
 		"sort": []map[string]interface{}{
@@ -49,6 +66,11 @@ func (app *Config) searchLatest(w http.ResponseWriter, r *http.Request) {
 					"order": "desc",
 				},
 			},
+		},
+		"from": userQuery.Page,
+		"size": os.Getenv("resultsize"),
+		"_source": map[string]interface{}{
+			"includes": []string{"screen_name", "text"},
 		},
 	}
 
@@ -62,7 +84,6 @@ func (app *Config) searchLatest(w http.ResponseWriter, r *http.Request) {
 		esClient.Search.WithContext(context.Background()),
 		esClient.Search.WithIndex("tweetscombined"), // Index to search within
 		esClient.Search.WithBody(&buf),
-		esClient.Search.WithTrackTotalHits(true),
 	)
 	if err != nil {
 		fmt.Printf("Error performing search request: %s", err)
@@ -75,23 +96,20 @@ func (app *Config) searchLatest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse the response
-	var resp map[string]interface{}
-	if err := json.NewDecoder(res.Body).Decode(&resp); err != nil {
-		fmt.Printf("Error parsing the response body: %s", err)
-		return
-	}
-
-	// Marshal response into readable JSON
-	jsonResponse, err := json.MarshalIndent(resp, "", "  ")
-	if err != nil {
-		fmt.Printf("Error marshaling response: %s", err)
-		return
-	}
-
 	// Return the JSON response
+	bodyContent, err := io.ReadAll(res.Body)
+	if err != nil {
+		return
+	}
+
+	resultJSON, err := ParseTweets(bodyContent)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(jsonResponse)
+	w.Write(resultJSON)
 
 }

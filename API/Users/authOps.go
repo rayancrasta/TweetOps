@@ -21,6 +21,7 @@ type Profile struct {
 	Followerscount int    `json:"followers_count"`
 	Followingcount int    `json:"following_count"`
 	Verified       bool   `json:"verified"`
+	Accountlang    string `json:"account_lang"`
 }
 
 func (app *Config) SignUp(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +43,7 @@ func (app *Config) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create a user
-	user := models.User{UserID: profile.UserID, Username: profile.Username, Password: string(hash), FollowersCount: profile.Followerscount, FollowingCount: profile.Followingcount}
+	user := models.User{UserID: profile.UserID, Username: profile.Username, Password: string(hash), FollowersCount: profile.Followerscount, FollowingCount: profile.Followingcount, Accountlang: profile.Accountlang}
 	result := initializers.DB.Clauses(clause.OnConflict{DoNothing: true}).Create(&user) // if not exsists insert
 
 	if result.Error != nil {

@@ -40,7 +40,7 @@ func consumeMessages() {
 		"bootstrap.servers":  os.Getenv("kafkaBroker"),
 		"group.id":           os.Getenv("consumergroupid"),
 		"auto.offset.reset":  "earliest",
-		"enable.auto.commit": "true",
+		"enable.auto.commit": "false",
 	}
 
 	consumer, err := kafka.NewConsumer(KafkaConsumerConfig)
@@ -102,6 +102,11 @@ func consumeMessages() {
 					continue
 				}
 				defer res.Body.Close()
+
+				// Commit the Kafka message offset
+				if _, err := consumer.CommitMessage(msg); err != nil {
+					log.Printf("Error committing offset: %v", err)
+				}
 
 			} else {
 				fmt.Printf("Consumer error: %v\n", err)

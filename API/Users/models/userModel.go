@@ -7,6 +7,7 @@ type User struct {
 	FollowersCount int
 	FollowingCount int
 	Verified       bool
+	Accountlang    string
 }
 
 type Follower struct {

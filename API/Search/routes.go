@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	authmiddleware "searchquery/auth"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -23,6 +24,9 @@ func (app *Config) routes() http.Handler {
 
 	//To check if service up or not
 	mux.Use(middleware.Heartbeat("/ping"))
+
+	//JWT and lang middlware
+	mux.Use(authmiddleware.JWTMiddleware)
 
 	//Add route at root level
 	mux.Get("/searchLatest", app.searchLatest)
