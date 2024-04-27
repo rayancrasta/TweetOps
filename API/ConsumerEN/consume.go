@@ -103,6 +103,13 @@ func consumeMessages() {
 				}
 				defer res.Body.Close()
 
+				//Send for safecheck
+				err = safeCheck(tweet)
+				if err != nil {
+					log.Printf("Error sending tweet into Elasticsearch: %v", err)
+					continue
+				}
+
 				// Commit the Kafka message offset
 				if _, err := consumer.CommitMessage(msg); err != nil {
 					log.Printf("Error committing offset: %v", err)
