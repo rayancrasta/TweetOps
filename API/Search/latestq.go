@@ -16,7 +16,7 @@ type Query struct {
 	Query       string `json:"query"`
 	Safemode    bool   `json:"safemode",optional`
 	Page        int    `json:"page",optional`
-	Accountlang string `json:"account_lang"`
+	Accountlang string `json:"account_lang"` // middleware
 }
 
 func (app *Config) searchLatest(w http.ResponseWriter, r *http.Request) {
@@ -43,36 +43,8 @@ func (app *Config) searchLatest(w http.ResponseWriter, r *http.Request) {
 
 	// Search query
 	var buf bytes.Buffer
-	query := map[string]interface{}{
-		"query": map[string]interface{}{
-			"bool": map[string]interface{}{
-				"must": []map[string]interface{}{
-					{
-						"match": map[string]interface{}{
-							"text": userQuery.Query,
-						},
-					},
-					{
-						"term": map[string]interface{}{
-							"lang": userQuery.Accountlang,
-						},
-					},
-				},
-			},
-		},
-		"sort": []map[string]interface{}{
-			{
-				"created_at": map[string]interface{}{
-					"order": "desc",
-				},
-			},
-		},
-		"from": userQuery.Page,
-		"size": os.Getenv("resultsize"),
-		"_source": map[string]interface{}{
-			"includes": []string{"screen_name", "text"},
-		},
-	}
+	query := getQuery(userQuery) // if safe mode true, then check for safe flag
+	print(query)
 
 	if err := json.NewEncoder(&buf).Encode(query); err != nil {
 		fmt.Printf("Error encoding query: %s", err)
@@ -112,4 +84,77 @@ func (app *Config) searchLatest(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(resultJSON)
 
+}
+
+func getQuery(userQuery Query) map[string]interface{} {
+	if userQuery.Safemode { //check safe flag
+		query := map[string]interface{}{
+			"query": map[string]interface{}{
+				"bool": map[string]interface{}{
+					"must": []map[string]interface{}{
+						{
+							"match": map[string]interface{}{
+								"text": userQuery.Query,
+							},
+						},
+						{
+							"term": map[string]interface{}{
+								"lang": userQuery.Accountlang,
+							},
+						},
+						{
+							"term": map[string]interface{}{
+								"safe": userQuery.Safemode,
+							},
+						},
+					},
+				},
+			},
+			"sort": []map[string]interface{}{
+				{
+					"created_at": map[string]interface{}{
+						"order": "desc",
+					},
+				},
+			},
+			"from": userQuery.Page,
+			"size": os.Getenv("resultsize"),
+			"_source": map[string]interface{}{
+				"includes": []string{"screen_name", "text"},
+			},
+		}
+		return query
+	} else { // normal
+		query := map[string]interface{}{
+			"query": map[string]interface{}{
+				"bool": map[string]interface{}{
+					"must": []map[string]interface{}{
+						{
+							"match": map[string]interface{}{
+								"text": userQuery.Query,
+							},
+						},
+						{
+							"term": map[string]interface{}{
+								"lang": userQuery.Accountlang,
+							},
+						},
+					},
+				},
+			},
+			"sort": []map[string]interface{}{
+				{
+					"created_at": map[string]interface{}{
+						"order": "desc",
+					},
+				},
+			},
+			"from": userQuery.Page,
+			"size": os.Getenv("resultsize"),
+			"_source": map[string]interface{}{
+				"includes": []string{"screen_name", "text"},
+			},
+		}
+		return query
+	}
 }

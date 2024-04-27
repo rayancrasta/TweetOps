@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"searchquery/initializers"
@@ -25,7 +24,7 @@ func JWTMiddleware(next http.Handler) http.Handler {
 		}
 
 		tokenString := strings.Split(authHeader, "Bearer ")[1]
-		log.Println("Token: ", tokenString)
+		// log.Println("Token: ", tokenString)
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			// Don't forget to validate the alg is what you expect:
